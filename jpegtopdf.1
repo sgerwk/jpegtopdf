@@ -1,0 +1,101 @@
+.TH jpegtopdf 1 "August 22, 2019"
+
+.
+.
+.
+.SH NAME
+jpegtopdf - convert a sequence of JPEG images into a PDF file
+
+.
+.
+.
+.SH SYNOPSIS
+.TP 10
+.B jpegtopdf
+[\fI-m margin\fP]
+[\fI-dx x\fP]
+[\fI-dy y\fP]
+[\fI-w width\fP]
+[\fI-e height\fP]
+[\fI-r rotations\fP]
+[\fI-o file.pdf\fP]
+[\fI-t\fP]
+[\fI-h\fP]
+.I file.jpeg...
+
+.
+.
+.
+.SH DESRIPTION
+
+Create a single PDF file out of a sequence of JPEG image. Each page of the
+output file contains one image, resized to be as large as possible while still
+fitting the A4 size both horizontally and vertically.
+
+.
+.
+.
+.SH OPTIONS
+
+.TP
+.BI -n " margin
+the margin to leave on all sides of the images
+
+.TP
+.BI -x " dx
+the horizontal displament of the images in the page;
+by default, they are placed centrally
+
+.TP
+.BI -y " dy
+the vertical displament of the images in the page;
+by default, they are placed centrally
+
+.TP
+.BI -w " width
+the input images have this width;
+this is usually unnecessary
+
+.TP
+.BI -e " height
+the input images have this height;
+this is usually unnecessary
+
+.TP
+.BI -r " rotations
+each character in the argument tells how to rotate each input image; 0 is no
+rotation, 1 is 90 degrees clockwise, 2 is 180 degrees clockwise, 3 is 270
+degress clockwise; 'a' and 'A' are like 1 and 3 but only when the width of the
+image is smaller than its height; if the string is shorter than the number of
+pages, its last character is the rotation of the remaining pages; for example,
+\fI-r 1\fP rotates all pages 90 degrees clockwise
+
+.TP
+.BI -o " file.pdf
+the name of the output file; the default is
+.I output.pdf
+
+.TP
+.B -t
+sort pages to reconstruct a two-side document scanned with a single-side ADF;
+in practice: scan the document front-side up, scan it again front-side down,
+then use this option
+
+.TP
+.B -h
+inline help
+
+.
+.
+.
+.SH NOTE
+
+The JPEG images are directly copied to the output PDF file. This means that
+resolution is not changed. However, the original JPEG images can be resized
+with \fInetpbm(1)\fP before passing them to \fIjpegtopdf\fP. This allows making
+the pdf file smaller.
+
+.nf
+jpegtopnm original.jpg | pnmscale 0.5 | pnmtojpeg > half.jpg
+.fi
+
