@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
 					/* rotation and scale */
 
 		rotate = 0;
-		y = i < rotatelen ? i : rotatelen - 1;
+		j = i < rotatelen ? i : rotatelen - 1;
 		if (rotatestring[j] >= '0' && rotatestring[j] <= '3')
 			rotate = rotatestring[j] - '0';
 		if (rotatestring[j] == 'a' && width > height)
