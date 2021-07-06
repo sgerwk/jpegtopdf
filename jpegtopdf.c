@@ -76,13 +76,14 @@ int main(int argc, char *argv[]) {
 	int rotate;
 	int x, y;
 	double pagewidth = 595, pageheight = 842;
+	double givenscale = 0;
 	double scale;
 	cairo_surface_t *insurface, *outsurface;
 	cairo_t *cr;
 
 				/* arguments */
 
-	while ((opt = getopt(argc, argv, "m:x:y:w:e:r:o:th")) != -1)
+	while ((opt = getopt(argc, argv, "m:x:y:w:e:s:r:o:th")) != -1)
 		switch(opt) {
 		case 'm':
 			margin = atoi(optarg);
@@ -106,6 +107,9 @@ int main(int argc, char *argv[]) {
 			oheight = atoi(optarg);
 			if (oheight == 0)
 				usage = 2;
+			break;
+		case 's':
+			givenscale = atof(optarg);
 			break;
 		case 'r':
 			rotatestring = optarg;
@@ -137,6 +141,7 @@ int main(int argc, char *argv[]) {
 		printf("[-h] file.jpg...\n");
 		printf("\t\t-w width\twidth of jpeg images\n");
 		printf("\t\t-e height\theight of jpeg images\n");
+		printf("\t\t-s scale\toutput is as input, scaled by this\n");
 		printf("\t\t-o file.pdf\tname ouf output file\n");
 		printf("\t\t-r rotations\thow to rotate each page\n");
 		printf("\t\t-h\t\tthis help\n");
@@ -194,6 +199,13 @@ int main(int argc, char *argv[]) {
 		iwidth = width;
 		iheight = height;
 		printf("%dx%d\n", width, height);
+
+		if (givenscale) {
+			pagewidth = width * givenscale;
+			pageheight = height * givenscale;
+			cairo_pdf_surface_set_size(outsurface,
+				pagewidth, pageheight);
+		}
 
 					/* rotation and scale */
 
