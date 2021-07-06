@@ -137,13 +137,16 @@ int main(int argc, char *argv[]) {
 	}
 	if (usage > 0) {
 		printf("usage:\n");
-		printf("\tjpegtopdf [-w width] [-e height] [-o file.pdf] ");
-		printf("[-h] file.jpg...\n");
+		printf("\tjpegtopdf [options] file.jpg ...\n");
+		printf("\t\t-m margin\tspace around images\n");
+		printf("\t\t-x x\t\tspace from left edge\n");
+		printf("\t\t-y y\t\tspace from top\n");
 		printf("\t\t-w width\twidth of jpeg images\n");
 		printf("\t\t-e height\theight of jpeg images\n");
 		printf("\t\t-s scale\toutput is as input, scaled by this\n");
+		printf("\t\t-r rotations\trotate images\n");
+		printf("\t\t-t\t\treconstruct a two-side document\n");
 		printf("\t\t-o file.pdf\tname ouf output file\n");
-		printf("\t\t-r rotations\thow to rotate each page\n");
 		printf("\t\t-h\t\tthis help\n");
 		exit(usage > 1 ? EXIT_FAILURE : EXIT_SUCCESS);
 	}
