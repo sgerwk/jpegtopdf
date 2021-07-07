@@ -203,14 +203,7 @@ int main(int argc, char *argv[]) {
 		iheight = height;
 		printf("%dx%d\n", width, height);
 
-		if (givenscale) {
-			pagewidth = width * givenscale;
-			pageheight = height * givenscale;
-			cairo_pdf_surface_set_size(outsurface,
-				pagewidth, pageheight);
-		}
-
-					/* rotation and scale */
+					/* rotation */
 
 		rotate = 0;
 		j = i < rotatelen ? i : rotatelen - 1;
@@ -224,6 +217,18 @@ int main(int argc, char *argv[]) {
 			width = iheight;
 			height = iwidth;
 		}
+
+					/* page size */
+
+		if (givenscale) {
+			pagewidth =  width  * givenscale + 2 * margin;
+			pageheight = height * givenscale + 2 * margin;
+			cairo_pdf_surface_set_size(outsurface,
+				pagewidth, pageheight);
+		}
+
+					/* scale */
+
 		scale = MAX(width  / (pagewidth  - 2 * margin),
 		            height / (pageheight - 2 * margin));
 		x = ox + (pagewidth  - width  / scale) / 2;
