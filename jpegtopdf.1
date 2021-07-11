@@ -78,8 +78,9 @@ pages, its last character is the rotation of the remaining pages; for example,
 .TP
 .B -t
 sort pages to reconstruct a two-side document scanned with a single-side ADF;
-in practice: scan the document front-side up, scan it again front-side down,
-then use this option
+in practice: scan the document front-side up, scan it again front-side down (do
+not reorder the pages), then use this option; the last page (the n/2+1-th) can
+be skipped if empty
 
 .TP
 .BI -o " file.pdf
