@@ -80,9 +80,9 @@ int main(int argc, char *argv[]) {
 
 	int n, i, j;
 	int in;
-	struct stat ss;
 	unsigned char *data;
-	unsigned long len, r;
+	unsigned long len, chunklen = 1024 * 16, r;
+	int inminus;
 	int res;
 	int width, height;
 	int iwidth, iheight;
@@ -177,6 +177,7 @@ int main(int argc, char *argv[]) {
 
 				/* loop over input images */
 
+	inminus = 0;
 	n = argc;
 	for (i = 0; i < n; i++) {
 		j = ! twoside ? i : i % 2 == 0 ? i / 2 : n - i / 2 - 1;
@@ -185,26 +186,28 @@ int main(int argc, char *argv[]) {
 
 					/* read input file */
 
-		stat(infile, &ss);
-		len = ss.st_size;
-		data = malloc(len);
-		if (data == NULL) {
-			fprintf(stderr,
-				"not enough memory for image %s\n", infile);
-			continue;
+		if (! strcmp(infile, "-")) {
+			if (inminus > 0) {
+				printf("error: stdin given more than once\n");
+				continue;
+			}
+			in = STDIN_FILENO;
+			inminus++;
 		}
-		in = open(infile, O_RDONLY);
-		if (in == -1) {
-			perror(infile);
-			continue;
+		else {
+			in = open(infile, O_RDONLY);
+			if (in == -1) {
+				perror(infile);
+				continue;
+			}
 		}
-		r = read(in, data, len);
-		if (r != len) {
-			fprintf(stderr,
-				"short read on %s: %lu bytes instead of %lu\n",
-				infile, r, len);
-			continue;
-		}
+		len = 0;
+		data = NULL;
+		do {
+			data = realloc(data, len + chunklen);
+			r = read(in, data + len, chunklen);
+			len += r;
+		} while (r == chunklen);
 		close(in);
 
 					/* width and height */
