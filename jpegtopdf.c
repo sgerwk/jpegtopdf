@@ -52,6 +52,19 @@ int jpegsize(unsigned char *data, int len, int *width, int *height) {
 }
 
 /*
+ * write to stdout
+ */
+cairo_status_t stdoutwrite(void *closure,
+		const unsigned char *data, unsigned len) {
+	int res;
+	(void) closure;
+	res = write(STDOUT_FILENO, data, len);
+	if (res >= 0 || (unsigned) res == len)
+		return CAIRO_STATUS_SUCCESS;
+	return CAIRO_STATUS_WRITE_ERROR;
+}
+
+/*
  * main
  */
 int main(int argc, char *argv[]) {
@@ -115,7 +128,8 @@ int main(int argc, char *argv[]) {
 			rotatestring = optarg;
 			rotatelen = strlen(rotatestring);
 			if (rotatelen < 1) {
-				printf("error: empty rotation string\n");
+				fprintf(stderr,
+					"error: empty rotation string\n");
 				usage = 2;
 			}
 			break;
@@ -132,7 +146,7 @@ int main(int argc, char *argv[]) {
 	argc -= optind;
 	argv += optind;
 	if (! usage && argc - 1 < 0) {
-		printf("error - no input file\n");
+		fprintf(stderr, "error - no input file\n");
 		usage = 2;
 	}
 	if (usage > 0) {
@@ -153,8 +167,13 @@ int main(int argc, char *argv[]) {
 
 				/* output file */
 
-	printf("outfile: %s\n", outfile);
-	outsurface = cairo_pdf_surface_create(outfile, pagewidth, pageheight);
+	fprintf(stderr, "outfile: %s\n", outfile);
+	if (! ! strcmp(outfile, "-"))
+		outsurface = cairo_pdf_surface_create(outfile,
+				pagewidth, pageheight);
+	else
+		outsurface = cairo_pdf_surface_create_for_stream(stdoutwrite,
+				NULL, pagewidth, pageheight);
 
 				/* loop over input images */
 
@@ -162,7 +181,7 @@ int main(int argc, char *argv[]) {
 	for (i = 0; i < n; i++) {
 		j = ! twoside ? i : i % 2 == 0 ? i / 2 : n - i / 2 - 1;
 		infile = argv[j];
-		printf("%s\n", infile);
+		fprintf(stderr, "%s\n", infile);
 
 					/* read input file */
 
@@ -170,7 +189,8 @@ int main(int argc, char *argv[]) {
 		len = ss.st_size;
 		data = malloc(len);
 		if (data == NULL) {
-			printf("not enough memory for image %s\n", infile);
+			fprintf(stderr,
+				"not enough memory for image %s\n", infile);
 			continue;
 		}
 		in = open(infile, O_RDONLY);
@@ -180,7 +200,8 @@ int main(int argc, char *argv[]) {
 		}
 		r = read(in, data, len);
 		if (r != len) {
-			printf("short read on %s: %lu bytes instead of %lu\n",
+			fprintf(stderr,
+				"short read on %s: %lu bytes instead of %lu\n",
 				infile, r, len);
 			continue;
 		}
@@ -191,7 +212,7 @@ int main(int argc, char *argv[]) {
 		if (owidth == 0 || oheight == 0) {
 			res = jpegsize(data, len, &width, &height);
 			if (res) {
-				printf("error parsing jpeg file\n");
+				fprintf(stderr, "error parsing jpeg file\n");
 				continue;
 			}
 		}
@@ -201,7 +222,7 @@ int main(int argc, char *argv[]) {
 			height = oheight;
 		iwidth = width;
 		iheight = height;
-		printf("%dx%d\n", width, height);
+		fprintf(stderr, "%dx%d\n", width, height);
 
 					/* rotation */
 
@@ -233,14 +254,15 @@ int main(int argc, char *argv[]) {
 		            height / (pageheight - 2 * margin));
 		x = ox + (pagewidth  - width  / scale) / 2;
 		y = oy + (pageheight - height / scale) / 2;
-		printf("%d,%d -> %dx%d / %g\n", x, y, width, height, scale);
+		fprintf(stderr, "%d,%d -> %dx%d /", x, y, width, height);
+		fprintf(stderr, "%g\n", scale);
 
 					/* input surface */
 
 		insurface = cairo_image_surface_create(CAIRO_FORMAT_RGB24,
 			iwidth, iheight);
 		if (cairo_surface_status(outsurface) != CAIRO_STATUS_SUCCESS) {
-			printf("error %s\n", argv[0]);
+			fprintf(stderr, "error %s\n", argv[0]);
 			exit(EXIT_FAILURE);
 		}
 		cairo_surface_set_mime_data(insurface, CAIRO_MIME_TYPE_JPEG,
