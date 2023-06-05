@@ -4,7 +4,7 @@
 .
 .
 .SH NAME
-jpegtopdf - convert a sequence of JPEG images into a PDF file
+jpegtopdf - make a PDF file out of a sequence of JPEG images
 
 .
 .
@@ -13,8 +13,8 @@ jpegtopdf - convert a sequence of JPEG images into a PDF file
 .TP 10
 .B jpegtopdf
 [\fI-m margin\fP]
-[\fI-dx x\fP]
-[\fI-dy y\fP]
+[\fI-x x\fP]
+[\fI-y y\fP]
 [\fI-w width\fP]
 [\fI-e height\fP]
 [\fI-s scale\fP]
@@ -31,7 +31,7 @@ jpegtopdf - convert a sequence of JPEG images into a PDF file
 
 Create a single PDF file out of a sequence of JPEG image. Each page of the
 output file contains one image, resized to be as large as possible while still
-fitting the A4 size both horizontally and vertically.
+fitting the page size both horizontally and vertically.
 
 .
 .
@@ -43,29 +43,51 @@ fitting the A4 size both horizontally and vertically.
 the margin to leave on all sides of the images
 
 .TP
-.BI -x " dx
+.BI -x " x
 the horizontal displament of the images in the page;
 by default, they are placed centrally
 
 .TP
-.BI -y " dy
+.BI -y " y
 the vertical displament of the images in the page;
 by default, they are placed centrally
 
 .TP
 .BI -w " width
-the input images have this width;
-this is usually unnecessary
+the width of the input images; this is usually unnecessary;
+it is not the width of the image on the page unless \fI-s 1\fP is also given
 
 .TP
 .BI -e " height
-the input images have this height;
-this is usually unnecessary
+the height of the input images; this is usually unnecessary;
+it is not the height of the image on the page unless \fI-s 1\fP is also given
 
 .TP
 .BI -s " scale
-make the output page as big as the input image, scaled by this amount;
-the default page size is A4
+scale input images by this amount;
+the default is to enlarge or shrink the page just enough to fit the page
+
+.TP
+.BI -p " paper
+size of the pages; default is the content of \fI/etc/papersize\fP if this file
+exists, otherwise is \fIA4\fP; this argument takes three possible forms:
+
+.RS
+
+.IP "  * " 4
+.I name
+the string identifying the paper size, like \fIA4\fP or \fIletter\fP
+
+.IP "  * "
+.I WxH
+the width and height of the page, in points
+
+.IP "  * "
+.I scale
+each page is as large as the image scaled by this number
+
+.RE
+.PD
 
 .TP
 .BI -r " rotations
