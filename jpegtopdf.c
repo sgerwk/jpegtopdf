@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
 	int usage = 0;
 	char *outfile = "output.pdf", *infile;
 	int ox = 0, oy = 0;
-	int imagewidth = 0, imageheight = 0;
+	int argwidth = 0, argheight = 0;	// size of image from cmdline
 	int margin = 0;
 	int twoside = 0;
 	char *rotatestring = "0";
@@ -192,13 +192,14 @@ int main(int argc, char *argv[]) {
 	unsigned long len, chunklen = 1024 * 16, r;
 	int inminus;
 	int res;
-	int width, height;
+	int width, height;			// size of image
+	int rwidth, rheight;			// size of rotated image
 	int rotate;
 	int x, y;
 	char *papersize = NULL;
 	struct rectangle *paperrectangle;
 	double pagewidth, pageheight;
-	double pagescale = 0, scale = 0, tscale;
+	double pagescale = 0, argscale = 0, scale, tscale;
 	cairo_surface_t *insurface, *outsurface;
 	cairo_t *cr;
 
@@ -220,17 +221,17 @@ int main(int argc, char *argv[]) {
 				usage = 2;
 			break;
 		case 'l':
-			imagewidth = atoi(optarg);
-			if (imagewidth == 0)
+			argwidth = atoi(optarg);
+			if (argwidth == 0)
 				usage = 2;
 			break;
 		case 'a':
-			imageheight = atoi(optarg);
-			if (imageheight == 0)
+			argheight = atoi(optarg);
+			if (argheight == 0)
 				usage = 2;
 			break;
 		case 's':
-			scale = atof(optarg);
+			argscale = atof(optarg);
 			break;
 		case 'p':
 			papersize = optarg;
@@ -358,16 +359,16 @@ int main(int argc, char *argv[]) {
 
 					/* width and height */
 
-		if (imagewidth == 0 || imageheight == 0) {
+		if (argwidth != 0 && argheight != 0) {
+			width = argwidth;
+			height = argheight;
+		}
+		else {
 			res = jpegsize(data, len, &width, &height);
 			if (res) {
 				fprintf(stderr, "error parsing jpeg file\n");
 				continue;
 			}
-		}
-		else {
-			width = imagewidth;
-			height = imageheight;
 		}
 		fprintf(stderr, "image size: %dx%d\n", width, height);
 
@@ -381,28 +382,29 @@ int main(int argc, char *argv[]) {
 			rotate = 1;
 		if (rotatestring[j] == 'A' && width > height)
 			rotate = 3;
-		if (rotate % 2 != 0) {
-			width = imageheight;
-			height = imagewidth;
-		}
+		rwidth =  rotate % 2 == 0 ? width : height;
+		rheight = rotate % 2 == 0 ? height : width;
+		fprintf(stderr, "size on page: %dx%d\n", rwidth, rheight);
 
 					/* page size */
 
 		if (pagescale != 0) {
-			tscale = scale == 0 ? 1 : scale;
-			pagewidth =  width  * tscale * pagescale + 2 * margin;
-			pageheight = height * tscale * pagescale + 2 * margin;
+			tscale = argscale != 0 ? argscale : 1;
+			pagewidth =  rwidth  * tscale * pagescale + 2 * margin;
+			pageheight = rheight * tscale * pagescale + 2 * margin;
 		}
+		fprintf(stderr, "page size: %gx%g\n", pagewidth, pageheight);
 		cairo_pdf_surface_set_size(outsurface, pagewidth, pageheight);
 
 					/* scale */
 
-		if (scale == 0)
-			scale = 1.0 / MAX(width  / (pagewidth  - 2 * margin),
-				          height / (pageheight - 2 * margin));
-		x = ox + (pagewidth  - width  * scale) / 2;
-		y = oy + (pageheight - height * scale) / 2;
-		fprintf(stderr, "%d,%d -> %dx%d *", x, y, width, height);
+		scale = argscale != 0 ? argscale :
+			pagescale != 0 ? (argscale != 0 ? argscale : 1) :
+			1.0 / MAX(rwidth  / (pagewidth  - 2 * margin),
+			          rheight / (pageheight - 2 * margin));
+		x = ox + (pagewidth  - rwidth  * scale) / 2;
+		y = oy + (pageheight - rheight * scale) / 2;
+		fprintf(stderr, "%d,%d -> %dx%d *", x, y, rwidth, rheight);
 		fprintf(stderr, " %g\n", scale);
 
 					/* input surface */
@@ -421,7 +423,7 @@ int main(int argc, char *argv[]) {
 		cr = cairo_create(outsurface);
 		cairo_translate(cr, x, y);
 		cairo_scale(cr, scale, scale);
-		cairo_translate(cr, width / 2, height / 2);
+		cairo_translate(cr, rwidth / 2, rheight / 2);
 		cairo_rotate(cr, rotate * M_PI / 2);
 		cairo_translate(cr, -width / 2, -height / 2);
 		cairo_set_source_surface(cr, insurface, 0, 0);
