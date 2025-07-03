@@ -290,6 +290,7 @@ int main(int argc, char *argv[]) {
 		printf("\t\t-e height\theight of page\n");
 		printf("\t\t-r rotations\trotate images\n");
 		printf("\t\t-t\t\treconstruct a two-side document\n");
+		printf("\t\t-n\t\tprint name of each file\n");
 		printf("\t\t-o file.pdf\tname of output file\n");
 		printf("\t\t-h\t\tthis help\n");
 		exit(usage > 1 ? EXIT_FAILURE : EXIT_SUCCESS);
