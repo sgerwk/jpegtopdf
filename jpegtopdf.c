@@ -185,6 +185,7 @@ int main(int argc, char *argv[]) {
 	int twoside = 0;
 	char *rotatestring = "0";
 	int rotatelen = 1;
+	int printname = 0, fontsize = 20;
 
 	int n, i, j;
 	int in;
@@ -205,7 +206,7 @@ int main(int argc, char *argv[]) {
 
 				/* arguments */
 
-	while ((opt = getopt(argc, argv, "m:x:y:w:e:p:s:r:o:th")) != -1)
+	while ((opt = getopt(argc, argv, "m:x:y:w:e:p:s:r:no:th")) != -1)
 		switch(opt) {
 		case 'm':
 			margin = atoi(optarg);
@@ -254,6 +255,9 @@ int main(int argc, char *argv[]) {
 					"error: empty rotation string\n");
 				usage = 2;
 			}
+			break;
+		case 'n':
+			printname = 1;
 			break;
 		case 'o':
 			outfile = optarg;
@@ -421,6 +425,8 @@ int main(int argc, char *argv[]) {
 					/* output page */
 
 		cr = cairo_create(outsurface);
+
+		cairo_save(cr);
 		cairo_translate(cr, x, y);
 		cairo_scale(cr, scale, scale);
 		cairo_translate(cr, rwidth / 2, rheight / 2);
@@ -429,6 +435,15 @@ int main(int argc, char *argv[]) {
 		cairo_set_source_surface(cr, insurface, 0, 0);
 		cairo_rectangle(cr, 0, 0, width, height);
 		cairo_fill(cr);
+		cairo_restore(cr);
+
+		if (printname) {
+			cairo_set_font_size(cr, fontsize);
+			cairo_move_to(cr, fontsize, fontsize);
+			cairo_show_text(cr, infile);
+			cairo_stroke(cr);
+		}
+
 		cairo_destroy(cr);
 
 		cairo_surface_show_page(outsurface);

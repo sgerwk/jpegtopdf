@@ -19,6 +19,7 @@ jpegtopdf - make a PDF file out of a sequence of JPEG images
 [\fI-e height\fP]
 [\fI-s scale\fP]
 [\fI-r rotations\fP]
+[\fI-n\fP]
 [\fI-o file.pdf\fP]
 [\fI-t\fP]
 [\fI-h\fP]
@@ -104,6 +105,10 @@ sort pages to reconstruct a two-side document scanned with a single-side ADF;
 in practice: scan the document front-side up, scan it again front-side down (do
 not reorder the pages), then use this option; the last page (the n/2+1-th) can
 be skipped if empty
+
+.TP
+.B -n
+print the names of the images
 
 .TP
 .BI -o " file.pdf
